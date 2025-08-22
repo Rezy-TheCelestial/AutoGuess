@@ -674,7 +674,7 @@ async def guessing_logic(client, chat_id, phone):
                     if isinstance(size, PhotoStrippedSize):
                         size_str = str(size)
                         # Check cache for matching Pokémon
-                        cache_dir = "cache"
+                        cache_dir = "cache.zip"
                         if os.path.exists(cache_dir):
                             for file in os.listdir(cache_dir):
                                 if file.endswith('.txt'):
@@ -690,7 +690,7 @@ async def guessing_logic(client, chat_id, phone):
                         
                         # Cache the size for new Pokémon
                         os.makedirs("saitama", exist_ok=True)
-                        with open("saitama/cache.txt", 'w') as file:
+                        with open("saitama/cache.zip", 'w') as file:
                             file.write(size_str)
                         await log_message(chat_id, "New Pokémon detected, cached photo signature")
             
@@ -727,14 +727,14 @@ async def guessing_logic(client, chat_id, phone):
                 await log_message(chat_id, f"The Pokémon was: {pokemon_name}")
                 
                 # Check if we have a cached photo for this Pokémon
-                if os.path.exists("saitama/cache.txt"):
+                if os.path.exists("saitama/cache.zip"):
                     try:
                         with open("saitama/cache.txt", 'r') as inf:
                             cont = inf.read().strip()
                         
                         if cont:
                             # Save to cache with Pokémon name
-                            cache_dir = "cache"
+                            cache_dir = "cache.zip"
                             os.makedirs(cache_dir, exist_ok=True)
                             cache_path = os.path.join(cache_dir, f"{pokemon_name.lower()}.txt")
                             
@@ -745,7 +745,7 @@ async def guessing_logic(client, chat_id, phone):
                             
                             # Clean up temporary cache
                             try:
-                                os.remove("saitama/cache.txt")
+                                os.remove("saitama/cache.zip")
                             except:
                                 pass
                     
