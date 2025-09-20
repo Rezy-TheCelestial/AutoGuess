@@ -11,7 +11,7 @@ commands:
   package:
     - "nano inxi"
   start:
-    - "python3 mongo.py"
+    - "python3 mongo2.py"
 
 env:
   ENVIRONMENT: "production"
