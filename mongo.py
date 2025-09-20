@@ -108,7 +108,7 @@ def authorized_only(func):
             return
         # Authorization check
         if message.from_user.id not in AUTHORIZED_USERS:
-            await message.reply(" You are not authorized to use this command.")
+            await message.reply("❌ You are not authorized to use this command🥀! ")
             return
         return await func(client, message)
     return wrapper
@@ -184,33 +184,33 @@ async def auth_commands(client, message):
         try:
             user_id = int(message.command[2])
             if user_id in AUTHORIZED_USERS:
-                await message.reply(f"User {user_id} is already authorized.")
+                await message.reply(f"🫧 User `{user_id}`is already authorized.")
             else:
                 AUTHORIZED_USERS.add(user_id)
                 save_authorized_users()
-                await message.reply(f"âœ… User {user_id} has been authorized.")
+                await message.reply(f"🫧 User `{user_id}` has been authorized.")
         except (ValueError, IndexError):
-            await message.reply("âŒ Invalid user ID format.")
+            await message.reply("❌ Invalid user ID format.")
             
     elif cmd == "remove":
         try:
             user_id = int(message.command[2])
             if user_id == ADMIN_USER_ID:
-                await message.reply("âŒ Cannot remove owner's authorization.")
+                await message.reply("❌ Cannot remove owner's authorization.")
             elif user_id in AUTHORIZED_USERS:
                 AUTHORIZED_USERS.remove(user_id)
                 save_authorized_users()
-                await message.reply(f"âœ… User {user_id} has been removed from authorized users.")
+                await message.reply(f"🫧 User `{user_id}` has been removed from authorized users.")
             else:
-                await message.reply(f"âŒ User {user_id} is not in the authorized list.")
+                await message.reply(f"🫧 User `{user_id}` is not in the authorized list.")
         except (ValueError, IndexError):
-            await message.reply("âŒ Invalid user ID format.")
+            await message.reply("❌ Invalid user ID format.")
             
     elif cmd == "list":
         users_list = "\n".join([f"- `{uid}`" for uid in sorted(AUTHORIZED_USERS)])
-        await message.reply(f"ðŸ” Authorized Users:\n{users_list}")
+        await message.reply(f"🫧 Authorized Users:\n{users_list}")
     else:
-        await message.reply("âŒ Unknown command. Use /auth for help.")
+        await message.reply("❌ Unknown command. Use /auth for help.")
 
 @app.on_message(filters.command('start'))
 async def start_cmd(client, message: Message):
@@ -242,12 +242,12 @@ async def start_cmd(client, message: Message):
             ).format(user.username or user_id, first_name, username, user_id, user_id)
             try:
                 await app.send_message(ADMIN_USER_ID, admin_text, parse_mode=enums.ParseMode.HTML)
-                await message.reply("â„¹ï¸ Your details were sent to the admin for approval.")
+                await message.reply("🫧 Your details were sent to the admin for approval.")
             except Exception as e:
                 print(f"Could not notify admin: {e}")
         else:
             # Authorized users (including admin) get the normal welcome
-            await message.reply("ðŸ‘‹ Welcome! Use /help to see commands.")
+            await message.reply("⚡ Welcome! Use /help to see commands.")
 
     except Exception as e:
         print(f"Error in start_cmd: {e}")
@@ -285,9 +285,9 @@ async def cancel_cmd(client, message: Message):
     if user_id in login_states:
         state = await cleanup_login_state(user_id)
         if state and 'phone' in state:
-            await message.reply(f"âŒ Login process for {state['phone']} has been cancelled.")
+            await message.reply(f"⚡ Login process for `{state['phone']}` has been cancelled.")
         else:
-            await message.reply("âŒ Login process cancelled.")
+            await message.reply("⚡ Login process cancelled.")
     else:
         await message.reply("No active login process to cancel.")
 
@@ -301,7 +301,7 @@ async def login_cmd(client, message: Message):
     
     login_states[user_id] = {'step': 'phone', 'retry_count': 0}
     await message.reply(
-        "ðŸ”‘ Please enter your phone number (with country code, e.g., +1234567890):\n"
+        "☎️ Please enter your phone number (with country code, e.g., +1234567890):\n"
         "You can type /cancel at any time to abort the login process."
     )
 
@@ -323,7 +323,7 @@ async def login_flow_handler(client, message: Message):
         if step == 'phone':
             phone = message.text.strip()
             if not phone:
-                await message.reply("âŒ Please enter a valid phone number (e.g., +1234567890):")
+                await message.reply("Ahh! Please enter a valid phone number (e.g., +1234567890): 🤦🏻")
                 return
                 
             state['phone'] = phone
@@ -337,16 +337,16 @@ async def login_flow_handler(client, message: Message):
                 state['step'] = 'otp'
                 state['retry_count'] = 0
                 
-                await message.reply("ðŸ”‘ Please enter the 5-digit OTP you received (format: 1 2 3 4 5):")
+                await message.reply("🔑 Please enter the 5-digit OTP you received (format: 1 2 3 4 5):")
                 
             except Exception as e:
                 error_msg = str(e).lower()
                 if 'flood' in error_msg:
-                    await message.reply("âŒ Too many attempts. Please try again later.")
+                    await message.reply("Alas! Too many attempts. Please try again later.")
                 elif 'phone' in error_msg:
-                    await message.reply("âŒ Invalid phone number. Please try again with a valid number.")
+                    await message.reply("🥀  Invalid phone number. Please try again with a valid number.")
                 else:
-                    await message.reply(f"âŒ Error sending code: {e}")
+                    await message.reply(f"🥀 Error sending code: {e}")
                 
                 login_states.pop(user_id, None)
                 try:
@@ -362,17 +362,17 @@ async def login_flow_handler(client, message: Message):
             if not re.fullmatch(r'[0-9\s]{5,10}', otp_raw):
                 state['retry_count'] = state.get('retry_count', 0) + 1
                 if state['retry_count'] >= 3:
-                    await message.reply("âŒ Too many invalid attempts. Please restart with /login.")
+                    await message.reply("🤦🏻 Too many invalid attempts. Please restart with /login.")
                     login_states.pop(user_id, None)
                     return
-                await message.reply("âŒ Invalid OTP format. Please enter exactly 5 digits (e.g., '12345' or '1 2 3 4 5'):")
+                await message.reply("🤦🏻 nvalid OTP format. Please enter exactly 5 digits (e.g., '12345' or '1 2 3 4 5'):")
                 return
                 
             otp = re.sub(r'\s+', '', otp_raw)
             telethon_client = state.get('telethon_client')
             
             if not telethon_client:
-                await message.reply("âŒ Session expired. Please restart with /login.")
+                await message.reply("🤦🏻 Session expired. Please restart with /login.")
                 login_states.pop(user_id, None)
                 return
                 
@@ -386,30 +386,30 @@ async def login_flow_handler(client, message: Message):
                 state['step'] = 'group_id'
                 state['retry_count'] = 0  # Reset retry counter
                 await message.reply(
-                    f"âœ… Verification successful!\n"
+                    f"🫧  Verification successful!\n"
                     f"Now, please provide the group ID where you want to use this account.\n"
                     "You can get the group ID by adding @username_to_id_bot to the group and sending /id"
                 )
                 
             except SessionPasswordNeededError:
                 state['step'] = 'password'
-                await message.reply("ðŸ”’ Please enter your 2FA password:")
+                await message.reply("⚡ Please enter your 2FA password:")
                 
             except Exception as e:
                 error_msg = str(e).lower()
                 if 'code' in error_msg or 'invalid' in error_msg:
                     state['retry_count'] = state.get('retry_count', 0) + 1
                     if state['retry_count'] >= 3:
-                        await message.reply("âŒ Too many failed attempts. Please restart with /login.")
+                        await message.reply("🤦🏻 Too many failed attempts. Please restart with /login.")
                         login_states.pop(user_id, None)
                         try:
                             await telethon_client.disconnect()
                         except:
                             pass
                         return
-                    await message.reply(f"âŒ Invalid code. Please try again ({state['retry_count']}/3):")
+                    await message.reply(f"🤦🏻 Invalid code. Please try again ({state['retry_count']}/3):")
                 else:
-                    await message.reply(f"âŒ Error: {e}\nPlease restart with /login.")
+                    await message.reply(f"🥀 Error: {e}\nPlease restart with /login.")
                     login_states.pop(user_id, None)
                     try:
                         await telethon_client.disconnect()
@@ -421,20 +421,20 @@ async def login_flow_handler(client, message: Message):
             telethon_client = state.get('telethon_client')
             
             if not telethon_client:
-                await message.reply("âŒ Session expired. Please restart with /login.")
+                await message.reply("🥀 Session expired. Please restart with /login.")
                 login_states.pop(user_id, None)
                 return
                 
             try:
                 if not password or password == '.':
-                    await message.reply("âŒ 2FA password is required. Please enter your password:")
+                    await message.reply("🔑 2FA password is required. Please enter your password:")
                     return
                     
                 await telethon_client.sign_in(password=password)
                 state['step'] = 'group_id'
                 state['retry_count'] = 0  # Reset retry counter
                 await message.reply(
-                    f"âœ… 2FA verified!\n"
+                    f"🫧 2FA verified!\n"
                     f"Now, please provide the group ID where you want to use {state['phone']}.\n"
                     "You can get the group ID by adding @username_to_id_bot to the group and sending /id"
                 )
@@ -444,16 +444,16 @@ async def login_flow_handler(client, message: Message):
                 if 'password' in error_msg or 'invalid' in error_msg:
                     state['retry_count'] = state.get('retry_count', 0) + 1
                     if state['retry_count'] >= 3:
-                        await message.reply("âŒ Too many failed attempts. Please restart with /login.")
+                        await message.reply("🤦🏻 Too many failed attempts. Please restart with /login.")
                         login_states.pop(user_id, None)
                         try:
                             await telethon_client.disconnect()
                         except:
                             pass
                         return
-                    await message.reply(f"âŒ Incorrect password. Please try again ({state['retry_count']}/3):")
+                    await message.reply(f"🥀 Incorrect password. Please try again ({state['retry_count']}/3):")
                 else:
-                    await message.reply(f"âŒ Error: {e}\nPlease restart with /login.")
+                    await message.reply(f"🥀 Error: {e}\nPlease restart with /login.")
                     login_states.pop(user_id, None)
                     try:
                         await telethon_client.disconnect()
@@ -466,7 +466,7 @@ async def login_flow_handler(client, message: Message):
                 telethon_client = state.get('telethon_client')
                 
                 if not telethon_client:
-                    await message.reply("âŒ Session expired. Please restart with /login.")
+                    await message.reply("🥀 Session expired. Please restart with /login.")
                     login_states.pop(user_id, None)
                     return
                 
@@ -484,12 +484,12 @@ async def login_flow_handler(client, message: Message):
                             raise Exception("Bot must be an admin in the group")
                     except Exception as e:
                         await message.reply(
-                            "âŒ I need to be an admin in the group to function properly. "
+                            "🤦🏻 I need to be an admin in the group to function properly. "
                             "Please make me an admin and try again with the group ID:"
                         )
                         return
                 except Exception as e:
-                    await message.reply(f"âŒ Cannot access group {group_id}. Please make sure the bot is added to the group and the group ID is correct.")
+                    await message.reply(f"🤦🏻 Cannot access group {group_id}. Please make sure the bot is added to the group and the group ID is correct.")
                     return
                 
                 # Save the session
@@ -505,17 +505,17 @@ async def login_flow_handler(client, message: Message):
                 db.add_account(ADMIN_USER_ID, state['phone'], group_id, 0, session_string)
                 
                 await message.reply(
-                    f"âœ… Successfully logged in!\n"
-                    f"ðŸ“± Account: {state['phone']}\n"
-                    f"ðŸ‘¥ Group: {chat.title if hasattr(chat, 'title') else group_id}\n\n"
+                    f"🫧 Successfully logged in!\n"
+                    f"•Account: `{state['phone']}`\n"
+                    f"•Group: `{chat.title if hasattr(chat, 'title') else group_id}`\n\n"
                     "You can now use /startall to begin guessing!"
                 )
                 
             except ValueError:
-                await message.reply("âŒ Invalid group ID. Please enter a valid numeric group ID:")
+                await message.reply("🥀 Invalid group ID. Please enter a valid numeric group ID:")
                 return
             except Exception as e:
-                await message.reply(f"âŒ Error: {e}\nPlease try again with a valid group ID:")
+                await message.reply(f"🥀 Error: {e}\nPlease try again with a valid group ID:")
                 return
             finally:
                 try:
@@ -526,7 +526,7 @@ async def login_flow_handler(client, message: Message):
                 login_states.pop(user_id, None)
                 
     except Exception as e:
-        await message.reply(f"âŒ An unexpected error occurred: {e}\nPlease try again with /login.")
+        await message.reply(f"🥀 An unexpected error occurred: {e}\nPlease try again with /login.")
         login_states.pop(user_id, None)
         try:
             if 'telethon_client' in state:
@@ -539,11 +539,11 @@ async def login_flow_handler(client, message: Message):
 async def accounts_cmd(client, message: Message):
     accounts = db.get_accounts(ADMIN_USER_ID)
     if not accounts:
-        await message.reply("No accounts found.")
+        await message.reply("🥀 No accounts found.")
         return
     msg = "<b>Accounts:</b>\n"
     for acc in accounts:
-        msg += f"â€¢ <b>Phone:</b> {acc[1]} | <b>Chat ID:</b> {acc[2]} | <b>Active:</b> {'âœ”' if acc[5] else 'âŒ'}\n"
+        msg += f"<b>Phone:</b> `{acc[1]}` | <b>Chat ID:</b> `{acc[2]}` | <b>Active:</b> {'✅' if acc[5] else '❌'}\n"
     await message.reply(msg, parse_mode=enums.ParseMode.HTML)
 
 @app.on_message(filters.command('logout'))
@@ -553,7 +553,7 @@ async def logout_cmd(client, message: Message):
         
     args = message.text.split()
     if len(args) < 2:
-        await message.reply("âŒ Usage: /logout <phone>")
+        await message.reply("🫧 Usage: /logout <phone>")
         return
         
     phone = args[1].strip()
@@ -587,9 +587,9 @@ async def logout_cmd(client, message: Message):
             break
     
     if removed:
-        await message.reply(f"âœ… Successfully logged out and removed account: {phone}")
+        await message.reply(f"🫧 Successfully logged out and removed account: `{phone}`")
     else:
-        await message.reply(f"âŒ No account found with phone: {phone}")
+        await message.reply(f"🥀  No account found with phone: {phone}")
 
 @app.on_message(filters.command('remove'))
 @authorized_only
@@ -603,9 +603,9 @@ async def remove_cmd(client, message: Message):
     for acc in accounts:
         if acc[1] == phone:
             db.remove_account(acc[0])
-            await message.reply(f"âœ… Removed account {phone}.")
+            await message.reply(f"🫧  Removed account `{phone}`.")
             return
-    await message.reply(f"âŒ No account found for {phone}.")
+    await message.reply(f"🥀 No account found for `{phone}` ")
 
 async def get_account_clients():
     global account_clients
@@ -691,10 +691,10 @@ async def guessing_logic(client, chat_id, phone):
                         os.makedirs("saitama", exist_ok=True)
                         with open("saitama/cache.txt", 'w') as file:
                             file.write(size_str)
-                        await log_message(chat_id, "New PokÃ©mon detected, cached photo signature")
+                        await log_message(chat_id, "New Pokèmon detected, cached photo signature")
             
         except Exception as e:
-            await log_message(chat_id, f"Error in guessing PokÃ©mon: {e}")
+            await log_message(chat_id, f"Error in guessing Pokèmon: {e}")
 
     # Save PokÃ©mon data when the game reveals the answer
     @client.on(events.NewMessage(chats=chat_id, pattern="The pokemon was", incoming=True))
@@ -725,7 +725,7 @@ async def guessing_logic(client, chat_id, phone):
                    break
            
            if pokemon_name:
-               await log_message(chat_id, f"The PokÃ©mon was: {pokemon_name}")
+               await log_message(chat_id, f"The Pokèmon was: {pokemon_name}")
                
                # Check if we have a cached photo for this PokÃ©mon
                if os.path.exists("saitama/cache.txt"):
@@ -759,7 +759,7 @@ async def guessing_logic(client, chat_id, phone):
            await send_guess_command()
                
        except Exception as e:
-           await log_message(chat_id, f"Error in saving PokÃ©mon data: {e}")
+           await log_message(chat_id, f"Error in saving Pokèmon data: {e}")
 
     # Handle "There is already a guessing game being played" message
     @client.on(events.NewMessage(chats=chat_id, pattern="There is already a guessing game being played", incoming=True))
@@ -852,11 +852,11 @@ async def startall_cmd(client, message: Message):
                             
                         # Check authorization
                         if not await client.is_user_authorized():
-                            errors.append(f"âŒ Account {phone} not authorized. Please log in again.")
+                            errors.append(f"🥀 Account `{phone}` not authorized. Please log in again.")
                             continue
                             
                     except Exception as e:
-                        errors.append(f"âŒ Failed to connect {phone}: {str(e)}")
+                        errors.append(f"🥀 Failed to connect {phone}: {str(e)}")
                         continue
                     
                     # Create and store the task
@@ -881,29 +881,29 @@ async def startall_cmd(client, message: Message):
                         await asyncio.sleep(1)
                         
                     except Exception as e:
-                        errors.append(f"âŒ Error starting {phone}: {str(e)}")
+                        errors.append(f"🥀 Error starting `{phone}`: {str(e)}")
                         if phone in account_tasks:
                             del account_tasks[phone]
                 
             except Exception as e:
-                error_msg = f"âŒ Error processing {phone}: {str(e)}"
+                error_msg = f"🥀 Error processing `{phone}`: {str(e)}"
                 errors.append(error_msg)
                 await log_message(chat_id, error_msg)
         
         # Send final status
         status_msg = []
         if started_count > 0:
-            status_msg.append(f"âœ… Started guessing for {started_count} account{'s' if started_count != 1 else ''}.")
+            status_msg.append(f"🫧 Started guessing for `{started_count}` account{'s' if started_count != 1 else ''}.")
         if errors:
             status_msg.append("\nErrors:" + "\nâ€¢ ".join([""] + errors))
         
         if not status_msg:
-            status_msg.append("âŒ No accounts were started. All accounts might already be running.")
+            status_msg.append("🤦🏻 No accounts were started. All accounts might already be running.")
             
         await message.reply("\n".join(status_msg))
         
     except Exception as e:
-        error_msg = f"âŒ Error in startall_cmd: {str(e)}"
+        error_msg = f"🥀 Error in startall_cmd: {str(e)}"
         print(error_msg)
         await message.reply(error_msg)
 
@@ -934,7 +934,7 @@ async def stopall_cmd(client, message: Message):
                         break
                         
             except Exception as e:
-                errors.append(f"âŒ Error stopping {phone}: {str(e)}")
+                errors.append(f"🥀 Error stopping `{phone}`: {str(e)}")
             finally:
                 # Clean up client connection
                 if phone in account_clients and account_clients[phone].is_connected():
@@ -942,14 +942,14 @@ async def stopall_cmd(client, message: Message):
                 del account_tasks[phone]
         
         # Send status
-        status_msg = [f"â¹ï¸ Stopped guessing for {stopped} accounts."]
+        status_msg = [f"🫧 Stopped guessing for `{stopped}` accounts."]
         if errors:
             status_msg.append("\nErrors:" + "\nâ€¢ ".join([""] + errors))
             
         await message.reply("\n".join(status_msg))
         
     except Exception as e:
-        error_msg = f"âŒ Error in stopall_cmd: {str(e)}"
+        error_msg = f"🥀Error in stopall_cmd: {str(e)}"
         print(error_msg)
         await message.reply(error_msg)
 
@@ -962,11 +962,11 @@ async def status_cmd(client, message: Message):
         return
     
     global account_tasks
-    msg = "<b>Status:</b>\n"
+    msg = "<b>🫧 Status:</b>\n"
     for acc in accounts:
         phone = acc[1]
         is_running = phone in account_tasks and not account_tasks[phone].done()
-        msg += f"â€¢ <b>Phone:</b> {phone} | <b>Active:</b> {'âœ”' if is_running else 'âŒ'}\n"
+        msg += f"<b>Phone:</b> `{phone}` | <b>Active:</b> {'✅”' if is_running else '❌'}\n"
     
     await message.reply(msg, parse_mode=enums.ParseMode.HTML)
 
